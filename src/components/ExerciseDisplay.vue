@@ -45,9 +45,8 @@ defineProps<{
 .exercise-desc {
   color: #333;
   font-size: 0.95rem;
-  margin-bottom: 8px;
   padding-left: 1.2rem;
-  margin-left: 0;
+  margin: 0;
 }
 .exercise-desc li {
   margin-bottom: 4px;

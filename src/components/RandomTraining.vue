@@ -101,6 +101,14 @@ const progressLabel = computed(() => {
   const idx = uniqueIds.indexOf(currentExercise.value.id)
   return `Exercise ${idx + 1} / ${uniqueIds.length}`
 })
+
+const totalSets = computed(() => plan.value?.repetitions.length ?? 0)
+const completedSets = computed(
+  () =>
+    plan.value?.repetitions.filter(
+      (r) => r.status !== ExercisePlanStatus.PENDING,
+    ).length ?? 0,
+)
 </script>
 
 <template>
@@ -123,7 +131,10 @@ const progressLabel = computed(() => {
   </div>
 
   <div v-if="plan && !completed" class="plan">
-    <h3 v-if="started">{{ progressLabel }}</h3>
+    <div v-if="started" class="progress-header">
+      <h3>{{ progressLabel }}</h3>
+      <progress :value="completedSets" :max="totalSets"></progress>
+    </div>
     <h3 v-else>Plan ready</h3>
     <!-- show full plan summary before starting -->
     <ExercisePlan v-if="plan && !started" :plan="plan.exercisePlan" />
@@ -146,7 +157,7 @@ const progressLabel = computed(() => {
               Set {{ s.setNumber }}
               <span class="status-inline">{{ statusLabel(s.status) }}</span>
             </div>
-            <div class="set-actions">
+            <div class="set-actions" :class="{ empty: !(s.isActive && s.status === ExercisePlanStatus.PENDING) }">
               <template v-if="s.isActive && s.status === ExercisePlanStatus.PENDING">
                 <button class="btn-exercise btn-done" @click="markCurrent(ExercisePlanStatus.DONE)">
                   Done
@@ -188,6 +199,19 @@ const progressLabel = computed(() => {
 .plan {
   margin-top: 1rem;
 }
+.progress-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.progress-header h3 {
+  white-space: nowrap;
+  margin: 0;
+}
+.progress-header progress {
+  flex: 1;
+  height: 16px;
+}
 .exercise-list {
   display: flex;
   flex-direction: column;
@@ -197,6 +221,7 @@ const progressLabel = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  margin-top: 6px;
 }
 .set-row {
   display: flex;
@@ -226,6 +251,9 @@ const progressLabel = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 8px;
+}
+.set-actions.empty {
+  display: none;
 }
 
 /* Ensure modifier buttons use dark text when their backgrounds are light */
