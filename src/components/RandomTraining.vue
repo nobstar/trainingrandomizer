@@ -212,6 +212,7 @@ const progressLabel = computed(() => {
 }
 .set-label {
   font-weight: 600;
+  color: #111;
   display: flex;
   align-items: center;
   justify-content: space-between;
