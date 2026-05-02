@@ -12,7 +12,7 @@ export class Exercise {
   id = ''
   name = ''
   muscleGroup = ExerciseMuscleGroup.NONE
-  description = ''
+  description: string[] = []
 }
 
 class ExcerciseInPlan {

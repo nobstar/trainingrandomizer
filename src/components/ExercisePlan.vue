@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import type { PropType } from 'vue'
 import type { ExercisePlan } from '../ts/excercises'
 import { exerciseRepository } from '../ts/excerciselist'
+import ExerciseDisplay from './ExerciseDisplay.vue'
 
 const props = defineProps({
   plan: { type: Object as PropType<ExercisePlan>, required: true },
@@ -25,13 +26,13 @@ const items = computed(() => {
   <div class="plan">
     <h3>Exercise Plan</h3>
     <div class="exercise-list">
-      <div class="exercise" v-for="(item, idx) in items" :key="item.id">
-        <div class="exercise-header">
-          <div class="exercise-name">{{ item.name }}</div>
-          <div class="exercise-sets-count">{{ item.sets }} sets</div>
-        </div>
-        <div class="exercise-desc">{{ item.description }}</div>
-      </div>
+      <ExerciseDisplay
+        v-for="(item, idx) in items"
+        :key="item.id"
+        :name="item.name"
+        :description="item.description"
+        :sets="item.sets"
+      />
     </div>
   </div>
 </template>
@@ -44,33 +45,5 @@ const items = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-.exercise {
-  display: flex;
-  flex-direction: column;
-  padding: 12px;
-  border: 1px solid #e6e6e6;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #111;
-}
-.exercise-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.exercise-name {
-  font-weight: 700;
-  color: #111;
-}
-.exercise-sets-count {
-  color: #666;
-  font-size: 0.9rem;
-}
-.exercise-desc {
-  color: #333;
-  font-size: 0.95rem;
-  margin-bottom: 8px;
 }
 </style>

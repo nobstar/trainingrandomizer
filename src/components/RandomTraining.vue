@@ -3,6 +3,7 @@ import { ref, computed } from 'vue'
 import { generateExercisePlanInstance } from '../ts/generator'
 import { ExerciseMuscleGroup, ExercisePlanStatus } from '../ts/excercises'
 import ExercisePlan from './ExercisePlan.vue'
+import ExerciseDisplay from './ExerciseDisplay.vue'
 import { exerciseRepository } from '../ts/excerciselist'
 import type { ExercisePlanInstance } from '../ts/excercises'
 
@@ -127,12 +128,12 @@ const progressLabel = computed(() => {
     <!-- show full plan summary before starting -->
     <ExercisePlan v-if="plan && !started" :plan="plan.exercisePlan" />
     <div class="exercise-list">
-      <div class="exercise" v-if="started && currentExercise" :key="currentExercise.id">
-        <div class="exercise-header">
-          <div class="exercise-name">{{ currentExercise.name }}</div>
-          <div class="exercise-sets-count">{{ currentExercise.sets.length }} sets</div>
-        </div>
-        <div class="exercise-desc">{{ currentExercise.description }}</div>
+      <div v-if="started && currentExercise" :key="currentExercise.id">
+        <ExerciseDisplay
+          :name="currentExercise.name"
+          :description="currentExercise.description"
+          :sets="currentExercise.sets.length"
+        />
 
         <div class="set-list">
           <div
@@ -191,34 +192,6 @@ const progressLabel = computed(() => {
   display: flex;
   flex-direction: column;
   gap: 1rem;
-}
-.exercise {
-  display: flex;
-  flex-direction: column;
-  padding: 12px;
-  border: 1px solid #e6e6e6;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #111;
-}
-.exercise-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 8px;
-}
-.exercise-name {
-  font-weight: bold;
-  color: #111;
-}
-.exercise-sets-count {
-  color: #666;
-  font-size: 0.9rem;
-}
-.exercise-desc {
-  color: #333;
-  font-size: 0.95rem;
-  margin-bottom: 8px;
 }
 .set-list {
   display: flex;
