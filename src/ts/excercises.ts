@@ -3,7 +3,7 @@ export enum ExerciseMuscleGroup {
   CHEST,
   LEGS,
   ARMS,
-  STOMACH,
+  CORE,
   BACK,
   SHOULDERS,
 }
@@ -73,7 +73,6 @@ export enum ExercisePlanStatus {
   PENDING,
   SKIPPED,
   DONE,
-  PARTIAL,
 }
 
 class ExcerciseExecutionInstance {

@@ -416,7 +416,7 @@ exerciseRepository.add({
 exerciseRepository.add({
   id: 'dumbbell-renegade-row',
   name: 'Dumbbell renegade row',
-  muscleGroup: ExerciseMuscleGroup.STOMACH,
+  muscleGroup: ExerciseMuscleGroup.CORE,
   description: [
     'Begin in a press-up position, but with feet set slightly wider for balance, holding the handles of a pair of dumbbells',
     'Row one dumbbell up to your hip, put it down, then row the other',
@@ -427,7 +427,7 @@ exerciseRepository.add({
 exerciseRepository.add({
   id: 'dumbbell-push-up-to-renegade-row',
   name: 'Dumbbell push-up to renegade row',
-  muscleGroup: ExerciseMuscleGroup.STOMACH,
+  muscleGroup: ExerciseMuscleGroup.CORE,
   description: [
     'Begin in a push-up position, holding the handles of a pair of dumbbells',
     'Do a push-up',
@@ -439,7 +439,7 @@ exerciseRepository.add({
 exerciseRepository.add({
   id: 'dumbbell-halo',
   name: 'Dumbbell halo',
-  muscleGroup: ExerciseMuscleGroup.STOMACH,
+  muscleGroup: ExerciseMuscleGroup.CORE,
   description: [
     'Holding a dumbbell in both hands, move it around your head in smooth circles, engaging your core as you circle it around',
     'After one complete circle, reverse directions',
@@ -449,7 +449,7 @@ exerciseRepository.add({
 exerciseRepository.add({
   id: 'dumbbell-russian-twist',
   name: 'Dumbbell Russian twist',
-  muscleGroup: ExerciseMuscleGroup.STOMACH,
+  muscleGroup: ExerciseMuscleGroup.CORE,
   description: [
     'Sit on the floor with your knees bent and feet slightly raised, gripping a dumbbell in front of you',
     'Twist to one side, wait, and then twist to the other',
@@ -460,7 +460,7 @@ exerciseRepository.add({
 exerciseRepository.add({
   id: 'dumbbell-crunch',
   name: 'Dumbbell crunch',
-  muscleGroup: ExerciseMuscleGroup.STOMACH,
+  muscleGroup: ExerciseMuscleGroup.CORE,
   description: [
     'Lie flat on your back with knees bent and a dumbbell held at chest level',
     'Contract your abs to lift your shoulders off the floor and curl your chest towards your knees',
@@ -471,7 +471,7 @@ exerciseRepository.add({
 exerciseRepository.add({
   id: 'dumbbell-side-bend',
   name: 'Dumbbell side bend',
-  muscleGroup: ExerciseMuscleGroup.STOMACH,
+  muscleGroup: ExerciseMuscleGroup.CORE,
   description: [
     'Hold a heavy dumbbell in one hand and bend your torso towards your weighted hand',
     'Wait when you feel a stretch up your opposite side, then straighten up without leaning forwards or back',
@@ -481,7 +481,7 @@ exerciseRepository.add({
 exerciseRepository.add({
   id: 'dumbbell-crunch-reach',
   name: 'Dumbbell crunch reach',
-  muscleGroup: ExerciseMuscleGroup.STOMACH,
+  muscleGroup: ExerciseMuscleGroup.CORE,
   description: [
     'Begin by lying on your back on a mat with your knees bent and feet flat on the floor',
     'Hold a dumbbell in each hand, extending your arms straight up towards the ceiling',

@@ -1,11 +1,16 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
+import { useRouter } from 'vue-router'
 import { generateExercisePlanInstance } from '../ts/generator'
 import { ExerciseMuscleGroup, ExercisePlanStatus } from '../ts/excercises'
+import { getLastExercises, saveLastExercises, recordExerciseSets } from '../ts/lastExercises'
 import ExercisePlan from './ExercisePlan.vue'
 import ExerciseDisplay from './ExerciseDisplay.vue'
+import RandomTrainingInputs from './RandomTrainingInputs.vue'
 import { exerciseRepository } from '../ts/excerciselist'
 import type { ExercisePlanInstance } from '../ts/excercises'
+
+const router = useRouter()
 
 const numExercises = ref<number>(8)
 const setsPerExercise = ref<number>(2)
@@ -15,7 +20,7 @@ const defaultGroups = [
   ExerciseMuscleGroup.CHEST,
   ExerciseMuscleGroup.LEGS,
   ExerciseMuscleGroup.ARMS,
-  ExerciseMuscleGroup.STOMACH,
+  ExerciseMuscleGroup.CORE,
   ExerciseMuscleGroup.BACK,
   ExerciseMuscleGroup.SHOULDERS,
 ]
@@ -25,10 +30,12 @@ const completed = ref(false)
 const started = ref(false)
 
 function onGenerate() {
+  const lastExercises = getLastExercises()
   const spec = {
     sets: setsPerExercise.value,
     excercises: numExercises.value,
     exerciseMuscleGroups: defaultGroups,
+    excludeIds: lastExercises,
   }
   plan.value = generateExercisePlanInstance(spec)
   started.value = false
@@ -42,6 +49,12 @@ function startPlan() {
 function markCurrent(status: ExercisePlanStatus) {
   if (!plan.value) return
   const finished = plan.value.done(status)
+  if (status === ExercisePlanStatus.DONE) {
+    const currentRep = plan.value.repetitions[plan.value.currentRepetitionIndex - 1]
+    if (currentRep) {
+      recordExerciseSets(currentRep.excerciseId, 1)
+    }
+  }
   if (finished) {
     completed.value = true
   }
@@ -52,14 +65,21 @@ function closePlan() {
   completed.value = false
 }
 
+function finishAndSave() {
+  if (plan.value) {
+    const uniqueIds = [...new Set(plan.value.exercisePlan.excercises.map((e) => e.excerciseId))]
+    saveLastExercises(uniqueIds)
+  }
+  closePlan()
+  router.push('/')
+}
+
 function statusLabel(status: ExercisePlanStatus) {
   switch (status) {
     case ExercisePlanStatus.DONE:
       return 'Done'
     case ExercisePlanStatus.SKIPPED:
       return 'Skipped'
-    case ExercisePlanStatus.PARTIAL:
-      return 'Partial'
     default:
       return 'Pending'
   }
@@ -112,32 +132,24 @@ const completedSets = computed(
 </script>
 
 <template>
-  <div class="input" v-if="!plan">
-    <form class="controls-grid" @submit.prevent="onGenerate">
-      <label class="control">
-        <span class="control-label">Number of exercises</span>
-        <input type="number" v-model.number="numExercises" min="1" class="control-input" />
-      </label>
-
-      <label class="control">
-        <span class="control-label">Sets per exercise</span>
-        <input type="number" v-model.number="setsPerExercise" min="1" class="control-input" />
-      </label>
-
-      <div class="actions">
-        <button type="submit" class="btn-exercise btn-default-color">Generate</button>
-      </div>
-    </form>
-  </div>
+  <RandomTrainingInputs
+    v-if="!plan"
+    v-model:num-exercises="numExercises"
+    v-model:sets-per-exercise="setsPerExercise"
+    @generate="onGenerate"
+  />
 
   <div v-if="plan && !completed" class="plan">
     <div v-if="started" class="progress-header">
       <h3>{{ progressLabel }}</h3>
       <progress :value="completedSets" :max="totalSets"></progress>
     </div>
-    <h3 v-else>Plan ready</h3>
     <!-- show full plan summary before starting -->
-    <ExercisePlan v-if="plan && !started" :plan="plan.exercisePlan" />
+    <ExercisePlan v-if="plan && !started" :plan="plan.exercisePlan">
+      <div class="regenerate-wrapper">
+        <button class="primary-button-red" @click="onGenerate">Regenerate</button>
+      </div>
+    </ExercisePlan>
     <div class="exercise-list">
       <div v-if="started && currentExercise" :key="currentExercise.id">
         <ExerciseDisplay
@@ -159,20 +171,11 @@ const completedSets = computed(
             </div>
             <div class="set-actions" :class="{ empty: !(s.isActive && s.status === ExercisePlanStatus.PENDING) }">
               <template v-if="s.isActive && s.status === ExercisePlanStatus.PENDING">
-                <button class="btn-exercise btn-done" @click="markCurrent(ExercisePlanStatus.DONE)">
+                <button class="primary-button-done" @click="markCurrent(ExercisePlanStatus.DONE)">
                   Done
                 </button>
-                <button
-                  class="btn-exercise btn-skip"
-                  @click="markCurrent(ExercisePlanStatus.SKIPPED)"
-                >
+                <button class="primary-button-red" @click="markCurrent(ExercisePlanStatus.SKIPPED)">
                   Skipped
-                </button>
-                <button
-                  class="btn-exercise btn-partial"
-                  @click="markCurrent(ExercisePlanStatus.PARTIAL)"
-                >
-                  Partial
                 </button>
               </template>
             </div>
@@ -182,22 +185,28 @@ const completedSets = computed(
     </div>
 
     <div v-if="plan && !started" style="margin-top: 8px">
-      <button class="btn-exercise btn-default-color" @click="startPlan">Start</button>
+      <button class="primary-button" @click="startPlan">Start workout</button>
     </div>
   </div>
 
   <div v-if="plan && completed" class="plan">
     <h3>Plan complete</h3>
     <ExercisePlan :plan="plan.exercisePlan" />
-    <div style="margin-top: 8px">
-      <button class="btn-exercise btn-default-color" @click="closePlan">Close</button>
-    </div>
+    <button class="primary-button-green" @click="finishAndSave">Finish & Save</button>
   </div>
 </template>
 
 <style scoped>
 .plan {
   margin-top: 1rem;
+}
+.regenerate-wrapper {
+  margin-top: 8px;
+}
+.completion-actions {
+  margin-top: 8px;
+  display: flex;
+  gap: 8px;
 }
 .progress-header {
   display: flex;
@@ -254,63 +263,5 @@ const completedSets = computed(
 }
 .set-actions.empty {
   display: none;
-}
-
-/* Ensure modifier buttons use dark text when their backgrounds are light */
-.btn-done,
-.btn-skip,
-.btn-partial {
-  color: #111;
-}
-
-/* Input grid styles */
-.controls-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-  align-items: end;
-}
-.control {
-  display: flex;
-  flex-direction: column;
-}
-.control-label {
-  font-size: 0.9rem;
-  margin-bottom: 6px;
-  color: #333;
-}
-.control-input {
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #d0d0d0;
-  background: #fff;
-}
-.actions {
-  display: flex;
-  align-items: center;
-}
-
-.btn-default-color {
-  background: #2f80ed;
-}
-
-.btn-exercise {
-  padding: 12px 18px;
-  font-size: 1rem;
-  border-radius: 10px;
-  background: #2f80ed;
-  color: #fff;
-  border: none;
-  cursor: pointer;
-}
-
-.btn-done {
-  background: #8ee0a3;
-}
-.btn-skip {
-  background: #f0c070;
-}
-.btn-partial {
-  background: #92b7ff;
 }
 </style>

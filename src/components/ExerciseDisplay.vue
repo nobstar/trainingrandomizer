@@ -15,6 +15,14 @@ defineProps<{
     <ol class="exercise-desc">
       <li v-for="(step, stepIdx) in description" :key="stepIdx">{{ step }}</li>
     </ol>
+    <a
+      class="exercise-video-link"
+      :href="`https://www.google.com/search?q=${encodeURIComponent(name)}+site:youtube.com`"
+      target="_blank"
+      rel="noopener noreferrer"
+    >
+      Watch video tutorial
+    </a>
   </div>
 </template>
 
@@ -50,5 +58,15 @@ defineProps<{
 }
 .exercise-desc li {
   margin-bottom: 4px;
+}
+.exercise-video-link {
+  display: inline-block;
+  margin-top: 8px;
+  color: #0645ad;
+  font-size: 0.9rem;
+  text-decoration: none;
+}
+.exercise-video-link:hover {
+  text-decoration: underline;
 }
 </style>

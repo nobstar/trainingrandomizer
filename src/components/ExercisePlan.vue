@@ -27,13 +27,14 @@ const items = computed(() => {
     <h3>Exercise Plan</h3>
     <div class="exercise-list">
       <ExerciseDisplay
-        v-for="(item, idx) in items"
+        v-for="item in items"
         :key="item.id"
         :name="item.name"
         :description="item.description"
         :sets="item.sets"
       />
     </div>
+    <slot />
   </div>
 </template>
 
