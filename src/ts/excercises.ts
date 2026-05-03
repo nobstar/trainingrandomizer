@@ -8,10 +8,17 @@ export enum ExerciseMuscleGroup {
   SHOULDERS,
 }
 
+export enum ExerciseEquipment {
+  BODYWEIGHT = 'BODYWEIGHT',
+  DUMBBELL = 'DUMBBELL',
+  BARBELL = 'BARBELL',
+}
+
 export class Exercise {
   id = ''
   name = ''
   muscleGroup = ExerciseMuscleGroup.NONE
+  equipment: ExerciseEquipment = ExerciseEquipment.BODYWEIGHT
   description: string[] = []
 }
 
@@ -37,21 +44,23 @@ export class ExerciseRepository {
 
   getRandomByMuscleGroup(
     muscleGroup: ExerciseMuscleGroup,
-    filter?: (ex: Exercise) => boolean,
-  ): Exercise {
+    hardFilter: (ex: Exercise) => boolean,
+    softFilter: (ex: Exercise) => boolean,
+  ): Exercise | null {
     const candidates = this.exercises.filter((ex) => ex.muscleGroup === muscleGroup)
     let pool = candidates.length > 0 ? candidates : this.exercises
 
-    if (filter) {
-      pool = pool.filter(filter)
-      if (pool.length === 0) {
-        throw new Error('Filter excluded all exercises')
-      }
-    }
+    pool = pool.filter(hardFilter)
 
     if (pool.length === 0) {
-      throw new Error('No exercises available')
+      return null
     }
+
+    const softPool = pool.filter(softFilter)
+    if (softPool.length > 0) {
+      pool = softPool
+    }
+
     const idx = Math.floor(Math.random() * pool.length)
     return pool[idx]!
   }

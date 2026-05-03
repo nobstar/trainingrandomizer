@@ -1,8 +1,10 @@
 <script setup lang="ts">
 import { computed } from 'vue'
 import { getExerciseHistory, getLastExercises } from '../ts/lastExercises'
-import { exerciseRepository } from '../ts/excerciselist'
+import { useExerciseRepository } from '../ts/useExerciseRepo'
 import { ExerciseMuscleGroup } from '../ts/excercises'
+
+const { repo: exerciseRepository } = useExerciseRepository()
 
 const history = getExerciseHistory()
 const lastWorkout = getLastExercises()

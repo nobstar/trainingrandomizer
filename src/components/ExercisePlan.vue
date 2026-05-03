@@ -2,12 +2,14 @@
 import { computed } from 'vue'
 import type { PropType } from 'vue'
 import type { ExercisePlan } from '../ts/excercises'
-import { exerciseRepository } from '../ts/excerciselist'
+import { useExerciseRepository } from '../ts/useExerciseRepo'
 import ExerciseDisplay from './ExerciseDisplay.vue'
 
 const props = defineProps({
   plan: { type: Object as PropType<ExercisePlan>, required: true },
 })
+
+const { repo: exerciseRepository } = useExerciseRepository()
 
 const items = computed(() => {
   return props.plan.excercises.map((e) => {

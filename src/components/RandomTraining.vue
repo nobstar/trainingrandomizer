@@ -1,21 +1,32 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { generateExercisePlanInstance } from '../ts/generator'
-import { ExerciseMuscleGroup, ExercisePlanStatus } from '../ts/excercises'
+import { ExerciseMuscleGroup, ExercisePlanStatus, ExerciseEquipment } from '../ts/excercises'
 import { getLastExercises, saveLastExercises, recordExerciseSets } from '../ts/lastExercises'
 import ExercisePlan from './ExercisePlan.vue'
 import ExerciseDisplay from './ExerciseDisplay.vue'
 import RandomTrainingInputs from './RandomTrainingInputs.vue'
-import { exerciseRepository } from '../ts/excerciselist'
+import { useExerciseRepository } from '../ts/useExerciseRepo'
+import { useLastEquipment } from '../ts/useLastEquipment'
 import type { ExercisePlanInstance } from '../ts/excercises'
 
 const router = useRouter()
+const { repo: exerciseRepository } = useExerciseRepository()
+const { lastEquipment, saveEquipment } = useLastEquipment()
 
 const numExercises = ref<number>(8)
 const setsPerExercise = ref<number>(2)
+const equipment = ref<ExerciseEquipment[]>(lastEquipment.value)
 
-// Use all muscle groups except NONE by default
+watch(
+  equipment,
+  (newVal) => {
+    saveEquipment(newVal)
+  },
+  { deep: true },
+)
+
 const defaultGroups = [
   ExerciseMuscleGroup.CHEST,
   ExerciseMuscleGroup.LEGS,
@@ -35,6 +46,7 @@ function onGenerate() {
     sets: setsPerExercise.value,
     excercises: numExercises.value,
     exerciseMuscleGroups: defaultGroups,
+    equipment: equipment.value,
     excludeIds: lastExercises,
   }
   plan.value = generateExercisePlanInstance(spec)
@@ -124,10 +136,7 @@ const progressLabel = computed(() => {
 
 const totalSets = computed(() => plan.value?.repetitions.length ?? 0)
 const completedSets = computed(
-  () =>
-    plan.value?.repetitions.filter(
-      (r) => r.status !== ExercisePlanStatus.PENDING,
-    ).length ?? 0,
+  () => plan.value?.repetitions.filter((r) => r.status !== ExercisePlanStatus.PENDING).length ?? 0,
 )
 </script>
 
@@ -136,6 +145,7 @@ const completedSets = computed(
     v-if="!plan"
     v-model:num-exercises="numExercises"
     v-model:sets-per-exercise="setsPerExercise"
+    v-model:equipment="equipment"
     @generate="onGenerate"
   />
 
@@ -169,7 +179,10 @@ const completedSets = computed(
               Set {{ s.setNumber }}
               <span class="status-inline">{{ statusLabel(s.status) }}</span>
             </div>
-            <div class="set-actions" :class="{ empty: !(s.isActive && s.status === ExercisePlanStatus.PENDING) }">
+            <div
+              class="set-actions"
+              :class="{ empty: !(s.isActive && s.status === ExercisePlanStatus.PENDING) }"
+            >
               <template v-if="s.isActive && s.status === ExercisePlanStatus.PENDING">
                 <button class="primary-button-done" @click="markCurrent(ExercisePlanStatus.DONE)">
                   Done

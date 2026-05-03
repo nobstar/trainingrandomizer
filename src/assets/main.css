@@ -33,6 +33,10 @@ a,
 .primary-button:hover {
   background: #1a6ad8;
 }
+.primary-button:disabled {
+  background: #999;
+  cursor: not-allowed;
+}
 
 .secondary-button {
   padding: 0.5rem 1rem;
@@ -47,7 +51,9 @@ a,
   display: inline-block;
   width: 100%;
   max-width: 30em;
-  transition: background-color 0.2s, color 0.2s;
+  transition:
+    background-color 0.2s,
+    color 0.2s;
 }
 .secondary-button:hover {
   background: #2f80ed;

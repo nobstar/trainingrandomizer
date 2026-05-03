@@ -1,15 +1,21 @@
-import { exerciseRepository } from './excerciselist'
-import { ExercisePlan, ExercisePlanInstance, type ExerciseMuscleGroup } from './excercises'
+import { useExerciseRepository } from './useExerciseRepo'
+import {
+  ExercisePlan,
+  ExercisePlanInstance,
+  type ExerciseMuscleGroup,
+  type ExerciseEquipment,
+} from './excercises'
 
 export type GenerationSpec = {
   sets: number
   excercises: number
   exerciseMuscleGroups: ExerciseMuscleGroup[]
+  equipment?: ExerciseEquipment[]
   excludeIds?: string[]
 }
 
 export function generateExercisePlan(spec: GenerationSpec): ExercisePlan {
-  const repo = exerciseRepository
+  const { repo } = useExerciseRepository()
   const plan = new ExercisePlan()
   const muscleGroupsShuffled = spec.exerciseMuscleGroups
     .map((value) => ({ value, sort: Math.random() }))
@@ -17,22 +23,37 @@ export function generateExercisePlan(spec: GenerationSpec): ExercisePlan {
     .map(({ value }) => value)
 
   const selectedIds = new Set<string>()
+  const equipmentSet = new Set(spec.equipment ?? [])
   const excludeIds = new Set(spec.excludeIds ?? [])
 
-  // Try to fill the plan with unique exercises. If we cannot find any new
-  // exercise during a full pass over the muscle groups, fail because there
-  // aren't enough unique exercises to satisfy the request.
+  const hardFilter = (e: { id: string; equipment: ExerciseEquipment }) => {
+    if (selectedIds.has(e.id)) {
+      return false
+    }
+    if (equipmentSet.size > 0 && !equipmentSet.has(e.equipment)) {
+      return false
+    }
+    return true
+  }
+
+  const softFilter = (e: { id: string }) => excludeIds.has(e.id)
+
   while (plan.excercises.length < spec.excercises) {
+    let addedThisRound = 0
     for (const muscleGroup of muscleGroupsShuffled) {
-      const ex = repo.getRandomByMuscleGroup(
-        muscleGroup,
-        (e) => !selectedIds.has(e.id) && !excludeIds.has(e.id),
-      )
+      const ex = repo.getRandomByMuscleGroup(muscleGroup, hardFilter, softFilter)
+      if (!ex) {
+        continue
+      }
       plan.add(ex.id, spec.sets)
       selectedIds.add(ex.id)
+      addedThisRound++
       if (plan.excercises.length >= spec.excercises) {
         break
       }
+    }
+    if (addedThisRound === 0) {
+      break
     }
   }
 

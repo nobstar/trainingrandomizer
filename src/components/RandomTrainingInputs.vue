@@ -1,14 +1,36 @@
 <script setup lang="ts">
+import { computed } from 'vue'
+import { ExerciseEquipment } from '../ts/excercises'
+
 const props = defineProps<{
   numExercises: number
   setsPerExercise: number
+  equipment: ExerciseEquipment[]
 }>()
 
 const emit = defineEmits<{
   generate: []
   'update:numExercises': [value: number]
   'update:setsPerExercise': [value: number]
+  'update:equipment': [value: ExerciseEquipment[]]
 }>()
+
+function toggleEquipment(eq: ExerciseEquipment) {
+  const newEquipment = [...props.equipment]
+  const idx = newEquipment.indexOf(eq)
+  if (idx >= 0) {
+    newEquipment.splice(idx, 1)
+  } else {
+    newEquipment.push(eq)
+  }
+  emit('update:equipment', newEquipment)
+}
+
+function isSelected(eq: ExerciseEquipment): boolean {
+  return props.equipment.includes(eq)
+}
+
+const hasEquipment = computed(() => props.equipment.length > 0)
 </script>
 
 <template>
@@ -36,8 +58,38 @@ const emit = defineEmits<{
         />
       </label>
 
+      <div class="control equipment-section">
+        <span class="control-label">Equipment</span>
+        <div class="equipment-checkboxes">
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              :checked="isSelected(ExerciseEquipment.BODYWEIGHT)"
+              @change="toggleEquipment(ExerciseEquipment.BODYWEIGHT)"
+            />
+            Bodyweight
+          </label>
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              :checked="isSelected(ExerciseEquipment.DUMBBELL)"
+              @change="toggleEquipment(ExerciseEquipment.DUMBBELL)"
+            />
+            Dumbbell
+          </label>
+          <label class="checkbox-label">
+            <input
+              type="checkbox"
+              :checked="isSelected(ExerciseEquipment.BARBELL)"
+              @change="toggleEquipment(ExerciseEquipment.BARBELL)"
+            />
+            Barbell
+          </label>
+        </div>
+      </div>
+
       <div class="actions">
-        <button type="submit" class="primary-button">Generate</button>
+        <button type="submit" class="primary-button" :disabled="!hasEquipment">Generate</button>
       </div>
     </form>
   </div>
@@ -68,5 +120,25 @@ const emit = defineEmits<{
 .actions {
   display: flex;
   align-items: center;
+}
+.equipment-section {
+  grid-column: 1 / -1;
+}
+.equipment-checkboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+.checkbox-label input {
+  width: 24px;
+  height: 24px;
+  accent-color: #2f80ed;
 }
 </style>
