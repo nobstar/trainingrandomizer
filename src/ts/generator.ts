@@ -36,7 +36,7 @@ export function generateExercisePlan(spec: GenerationSpec): ExercisePlan {
     return true
   }
 
-  const softFilter = (e: { id: string }) => excludeIds.has(e.id)
+  const softFilter = (e: { id: string }) => !excludeIds.has(e.id)
 
   while (plan.excercises.length < spec.excercises) {
     let addedThisRound = 0
